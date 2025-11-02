@@ -482,9 +482,6 @@ export interface ApiCategoriaCategoria extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     descripcion: Schema.Attribute.Blocks;
-    enviarNotificacion: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    esUrgente: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -497,7 +494,6 @@ export interface ApiCategoriaCategoria extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
-    portada: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     publicaciones: Schema.Attribute.Relation<
       'manyToMany',
       'api::publicacion.publicacion'

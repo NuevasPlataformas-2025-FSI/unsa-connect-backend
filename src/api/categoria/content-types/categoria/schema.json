@@ -20,29 +20,11 @@
     "descripcion": {
       "type": "blocks"
     },
-    "esUrgente": {
-      "type": "boolean",
-      "default": false
-    },
-    "enviarNotificacion": {
-      "type": "boolean",
-      "default": false
-    },
-    "portada": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
-    },
     "publicaciones": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::publicacion.publicacion",
-      "mappedBy": "categorias"
+      "inversedBy": "categorias"
     }
   }
 }
