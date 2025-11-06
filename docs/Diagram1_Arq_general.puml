@@ -1,0 +1,25 @@
+@startuml
+skinparam rectangleBorderThickness 1
+skinparam rectangleBorderColor #333
+skinparam componentStyle uml2
+
+package "Backend (El Proyecto)" {
+  [Panel de Admin\n(CMS)] as Admin
+  [API REST\n(Strapi)] as API
+  [Base de Datos\n(Supabase/PostgreSQL)] as DB
+
+  Admin --> API
+  API -right-> DB
+}
+
+package "Clientes (Consumidores)" {
+  [App Móvil (Futuro)] as Movil
+  [Sitio Web (Futura)] as Web
+  [Postman (Pruebas)] as Postman
+}
+
+API <.left. Movil : "consume (JSON)"
+API <.. Web : "consume (JSON)"
+API <.. Postman : "consume (JSON)"
+
+@enduml

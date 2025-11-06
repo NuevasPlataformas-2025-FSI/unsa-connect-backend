@@ -1,0 +1,29 @@
+@startuml
+skinparam rectangleBorderThickness 1
+skinparam rectangleBorderColor #333
+skinparam componentStyle uml2
+skinparam nodeStyle rectangle
+
+cloud "Internet" {
+  database "Base de Datos Centralizada\n(Supabase - PostgreSQL)" as Supabase
+  [Plataforma de Producción\n(Render)] as Render
+}
+
+package "Entorno de Producción (Nube)" {
+  Render ..> Supabase : "Conexión Segura (SSL)"
+  [Usuario App Móvil] ..> Render : "GET /api/publicaciones"
+}
+
+package "Entorno de Desarrollo (Local)" {
+  node "PC Desarrollador 1\n" as Dev1 {
+    [Docker Container\n(Strapi App)] as Docker1
+  }
+
+  node "PC Desarrollador 2\n" as Dev2 {
+    [Docker Container\n(Strapi App)] as Docker2
+  }
+
+  Docker1 ..> Supabase : "Conexión Segura (SSL)"
+  Docker2 ..> Supabase : "Conexión Segura (SSL)"
+}
+@enduml
