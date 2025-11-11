@@ -17,13 +17,10 @@ export default factories.createCoreController('api::publicacion.publicacion', ({
             // default
             if (!raw) return { categorias: true, portada: true };
 
-            // if client asked for '*' we only expand to the ALLOWED set (not everything)
+            // Caso: populate=* -> traer todo lo permitido
             if (raw === '*') {
                 const obj = {};
-                ALLOWED.forEach(k => {
-                    if (k === 'contenido') obj[k] = { populate: '*' };
-                    else obj[k] = true;
-                });
+                ALLOWED.forEach(k => { obj[k] = true; });
                 return obj;
             }
 
@@ -35,25 +32,20 @@ export default factories.createCoreController('api::publicacion.publicacion', ({
                 } catch (e) {
                     // not JSON
                 }
+                const obj = {};
 
-                // support comma separated list: portada,categorias
+                // Soporte para lista: "portada,categorias,contenido"
                 if (raw.indexOf(',') !== -1) {
-                    const arr = raw.split(',').map(s => s.trim()).filter(Boolean);
-                    const obj = {};
-                    arr.forEach(k => {
-                        if (!ALLOWED.includes(k)) return; // ignore non-whitelisted
-                        if (k === 'contenido') obj[k] = { populate: '*' };
-                        else obj[k] = true;
+                    raw.split(',').map(s => s.trim()).filter(Boolean).forEach(k => {
+                        if (ALLOWED.includes(k)) obj[k] = true;
                     });
-                    return obj;
+                    return Object.keys(obj).length > 0 ? obj : { categorias: true, portada: true };
                 }
 
-                // single field - only allow if whitelisted
+                // Soporte para un solo campo: "contenido"
                 if (ALLOWED.includes(raw)) {
-                    return raw === 'contenido' ? { [raw]: { populate: '*' } } : { [raw]: true };
+                    return { [raw]: true };
                 }
-                // not allowed -> default
-                return { categorias: true, portada: true };
             }
 
             return { categorias: true, portada: true };
@@ -112,36 +104,29 @@ export default factories.createCoreController('api::publicacion.publicacion', ({
         const ALLOWED = ['portada', 'categorias', 'contenido', 'createdBy', 'updatedBy'];
 
         const buildPopulate = (raw) => {
-            if (!raw) return { categorias: true, contenido: { populate: '*' }, portada: true };
+             // Default para findOne: un poco más completo
+            if (!raw) return { categorias: true, contenido: true, portada: true };
+
             if (raw === '*') {
                 const obj = {};
-                ALLOWED.forEach(k => {
-                    if (k === 'contenido') obj[k] = { populate: '*' };
-                    else obj[k] = true;
-                });
+                ALLOWED.forEach(k => { obj[k] = true; });
                 return obj;
             }
             if (typeof raw === 'string') {
                 try {
-                    const parsed = JSON.parse(raw);
-                    return parsed;
-                } catch (e) {
-                    // not JSON
-                }
+                     return JSON.parse(raw);
+                } catch (e) {}
+
+                const obj = {};
                 if (raw.indexOf(',') !== -1) {
-                    const arr = raw.split(',').map(s => s.trim()).filter(Boolean);
-                    const obj = {};
-                    arr.forEach(k => {
-                        if (!ALLOWED.includes(k)) return;
-                        if (k === 'contenido') obj[k] = { populate: '*' };
-                        else obj[k] = true;
+                     raw.split(',').map(s => s.trim()).filter(Boolean).forEach(k => {
+                        if (ALLOWED.includes(k)) obj[k] = true;
                     });
-                    return obj;
+                    return Object.keys(obj).length > 0 ? obj : { categorias: true, contenido: true, portada: true };
                 }
-                if (ALLOWED.includes(raw)) return raw === 'contenido' ? { [raw]: { populate: '*' } } : { [raw]: true };
-                return { categorias: true, contenido: { populate: '*' }, portada: true };
+                if (ALLOWED.includes(raw)) return { [raw]: true };
             }
-            return { categorias: true, contenido: { populate: '*' }, portada: true };
+            return { categorias: true, contenido: true, portada: true };
         };
 
         const populate = buildPopulate(rawPopulate);
