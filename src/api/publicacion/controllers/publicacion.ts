@@ -3,6 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi'
+import { parse } from 'path';
 
 export default factories.createCoreController('api::publicacion.publicacion', ({ strapi }) => ({
     async find(ctx) {
@@ -77,11 +78,20 @@ export default factories.createCoreController('api::publicacion.publicacion', ({
             }
         }
 
+        // Calcular Metadata para paginación
+        const q: any = ctx.query;
+        const page = parseInt(q?.pagination?.page || '1', 10);
+        const pageSize = parseInt(q?.pagination?.pageSize || '10', 10);
+
         // Usa DB QUERY para saltar filtros automaticos de Strapi que ocultan publishedAt
         const entities = await strapi.db.query('api::publicacion.publicacion').findMany({
             where,
             populate,
+            limit: pageSize,
+            offset: (page - 1) * pageSize,
         });
+
+        const total = await strapi.db.query('api::publicacion.publicacion').count({ where });
 
         // sanitize: remove sensitive fields from any user objects that may be present
         const sensitiveKeys = ['password', 'resetPasswordToken', 'confirmationToken', 'registrationToken'];
@@ -114,7 +124,17 @@ export default factories.createCoreController('api::publicacion.publicacion', ({
         };
 
         traverseAndSanitize(entities);
-        return entities;
+        return {
+            data: entities,
+            meta: {
+                pagination: {
+                    page,
+                    pageSize,
+                    pageCount: Math.ceil(total / pageSize),
+                    total,
+                },
+            },
+        };
     },
 
     async findOne(ctx) {
